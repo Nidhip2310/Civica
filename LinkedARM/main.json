@@ -1,0 +1,65 @@
+
+//The fist deployment resource, storage consumes the parent parameters and deploys the
+// storage template.
+// The second deployment resource consumes the parent parameters, 
+//  depends on the storage deployment, and then deploys
+//  the identity template. Finally, output is created for the storage account endpoint.
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "nameID":{
+           "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "Storage.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "name": {"value": "[parameters('name')]"},
+                    "location": {"value": "[parameters('location')]"}
+                }
+            }
+        },
+        {
+            "name": "[parameters('nameID')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments',parameters('name'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "identity.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "nameID": {
+                        "value": "[parameters('nameID')]" 
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "storageURI": {
+            "type": "string",
+            "value": "[reference(parameters('name')).outputs.storageEndpoint.value]"
+        }
+    }
+}
