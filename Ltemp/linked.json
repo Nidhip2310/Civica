@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AppInsights_name": {
+            "type": "string",
+            "defaultValue": "AppInsName"
+        },
+        "location": {
+            "type": "string"
+        },
+        "type": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('AppInsights_name')]",
+            "type": "microsoft.insights/components",
+            "location": "[parameters('location')]",
+            "kind": "windows",
+            "apiVersion": "2015-05-01",
+            "properties": {
+                "ApplicationId": "[parameters('AppInsights_name')]",
+                "Application_Type": "[parameters('type')]"
+            },
+            "tags":{
+                "environment" : "devlopment"
+            }
+        }
+    ],
+    "outputs": {
+        "APPINSIGHTS_INSTRUMENTATIONKEY": {
+            "value": "[reference(resourceId('microsoft.insights/components/', parameters('AppInsights_name')), '2015-05-01').InstrumentationKey]",
+            "type": "string"
+        },
+        "App_Id": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Insights/components/', parameters('AppInsights_name')), '2015-05-01').AppId]"
+        }
+    }
+}
